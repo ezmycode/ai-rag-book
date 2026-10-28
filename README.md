@@ -26,28 +26,51 @@ The system combines book metadata, hierarchical summaries, semantic search, and 
 
 ## Architecture
 
-The system uses SQLite for structured metadata and Qdrant for vector search.
-
-mermaid
+text
 
 ```
-flowchart TD
-    A[PDF Books] --> B[Text Extraction]
-    B --> C[Metadata and Summary Extraction]
-    B --> D[Chunking and Hierarchical Summaries]
-    C --> E[SQLite Catalog]
-    D --> F[Embeddings]
-    F --> G[Qdrant Vector Store]
-    H[User Query] --> I[Qwen2.5:7B Query Router]
-    E --> I
-    I --> J{Query Type}
-    J -->|Metadata| E
-    J -->|Semantic Search| G
-    G --> K[Cross-Encoder Reranking]
-    K --> L[Qwen2.5:7B Answer Generation]
-    E --> L
-    L --> M[Answer with Citations]
+                  PDF Books
+                      |
+                      v
+               Text Extraction
+                      |
+          +-----------+-----------+
+          |                       |
+          v                       v
+   Metadata Extraction      Text Chunking
+          |                       |
+          v                       v
+     SQLite Catalog       Summaries & Embeddings
+                                  |
+                                  v
+                           Qdrant Vector Store
+
+                  User Query
+                      |
+                      v
+             Qwen2.5:7B Router
+                      |
+                      v
+               Query Type?
+                /         \
+               v           v
+         Metadata       Semantic Search
+          Lookup             |
+             |               v
+             |          Qdrant Retrieval
+             |               |
+             |               v
+             |        Cross-Encoder Reranking
+             |               |
+             +-------+-------+
+                     |
+                     v
+             Qwen2.5:7B LLM
+                     |
+                     v
+             Answer with Citations
 ```
+
 
 ### Technology Stack
 
